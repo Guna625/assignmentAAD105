@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavItem, PageId } from '@/types';
+import { NavItem, PageId, Version } from '@/types';
 import {
   Users,
   Database,
@@ -10,6 +10,8 @@ import {
   Menu,
   X,
   BookOpen,
+  User,
+  UserCheck,
 } from 'lucide-react';
 import { StudentForm } from '@/pages/StudentForm';
 import { MongoGuide } from '@/pages/MongoGuide';
@@ -17,6 +19,12 @@ import { StringCombiner } from '@/pages/StringCombiner';
 import { Multimedia } from '@/pages/Multimedia';
 import { Weather } from '@/pages/Weather';
 import { Interactive } from '@/pages/Interactive';
+import { StudentFormFriend } from '@/pages/friend/StudentFormFriend';
+import { MongoGuideFriend } from '@/pages/friend/MongoGuideFriend';
+import { StringCombinerFriend } from '@/pages/friend/StringCombinerFriend';
+import { MultimediaFriend } from '@/pages/friend/MultimediaFriend';
+import { WeatherFriend } from '@/pages/friend/WeatherFriend';
+import { InteractiveFriend } from '@/pages/friend/InteractiveFriend';
 
 const NAV_ITEMS: NavItem[] = [
   {
@@ -78,12 +86,29 @@ function getIcon(name: string) {
 function App() {
   const [activePage, setActivePage] = useState<PageId>('student-form');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [version, setVersion] = useState<Version>('mine');
 
   useEffect(() => {
     setSidebarOpen(false);
-  }, [activePage]);
+  }, [activePage, version]);
 
   function renderPage() {
+    if (version === 'friend') {
+      switch (activePage) {
+        case 'student-form':
+          return <StudentFormFriend />;
+        case 'mongodb-guide':
+          return <MongoGuideFriend />;
+        case 'string-combiner':
+          return <StringCombinerFriend />;
+        case 'multimedia':
+          return <MultimediaFriend />;
+        case 'weather':
+          return <WeatherFriend />;
+        case 'interactive':
+          return <InteractiveFriend />;
+      }
+    }
     switch (activePage) {
       case 'student-form':
         return <StudentForm />;
@@ -101,13 +126,20 @@ function App() {
   }
 
   const activeItem = NAV_ITEMS.find((i) => i.id === activePage)!;
+  const isFriend = version === 'friend';
+  const accent = isFriend ? 'emerald' : 'slate';
+  const accentBg = isFriend ? 'bg-emerald-600' : 'bg-slate-900';
+  const accentBgHover = isFriend ? 'hover:bg-emerald-700' : 'hover:bg-slate-800';
+  const accentText = isFriend ? 'text-emerald-600' : 'text-slate-900';
+  const accentDot = isFriend ? 'bg-emerald-600' : 'bg-slate-900';
+  const pageBg = isFriend ? 'bg-emerald-50/30' : 'bg-slate-50';
 
   return (
-    <div className="min-h-screen bg-slate-50 gradient-mesh">
+    <div className={`min-h-screen ${pageBg} gradient-mesh`}>
       {/* Mobile header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-slate-200/60 px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center">
+          <div className={`w-9 h-9 rounded-xl ${accentBg} flex items-center justify-center`}>
             <BookOpen className="w-5 h-5 text-white" />
           </div>
           <span className="font-semibold text-slate-900 text-sm">Web Dev Lab</span>
@@ -139,7 +171,7 @@ function App() {
         `}
       >
         <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-100">
-          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center">
+          <div className={`w-10 h-10 rounded-xl ${accentBg} flex items-center justify-center`}>
             <BookOpen className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -150,7 +182,33 @@ function App() {
           </div>
         </div>
 
-        <nav className="px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin h-[calc(100%-4rem)]">
+        {/* Version toggle */}
+        <div className="px-4 py-3 border-b border-slate-100">
+          <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
+            <button
+              onClick={() => setVersion('mine')}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                !isFriend
+                  ? `${accentBg} text-white shadow-sm`
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" /> Mine
+            </button>
+            <button
+              onClick={() => setVersion('friend')}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                isFriend
+                  ? `${accentBg} text-white shadow-sm`
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <UserCheck className="w-3.5 h-3.5" /> Friend's
+            </button>
+          </div>
+        </div>
+
+        <nav className="px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin h-[calc(100%-8.5rem)]">
           {NAV_ITEMS.map((item) => {
             const Icon = getIcon(item.icon);
             const isActive = item.id === activePage;
@@ -162,7 +220,7 @@ function App() {
                   w-full text-left px-3 py-3 rounded-xl transition-all duration-200 group
                   ${
                     isActive
-                      ? 'bg-slate-900 text-white shadow-md shadow-slate-900/15'
+                      ? `${accentBg} text-white shadow-md ${isFriend ? 'shadow-emerald-900/15' : 'shadow-slate-900/15'}`
                       : 'hover:bg-slate-50 text-slate-600'
                   }
                 `}
@@ -228,6 +286,10 @@ function App() {
                   </span>
                   <span className="text-slate-300">/</span>
                   <span className="text-xs text-slate-400">Assignment</span>
+                  <span className="text-slate-300">/</span>
+                  <span className={`text-xs font-medium ${accentText}`}>
+                    {isFriend ? "Friend's Version" : 'Your Version'}
+                  </span>
                 </div>
                 <h1 className="text-lg font-semibold text-slate-900">
                   {activeItem.label}
@@ -242,7 +304,7 @@ function App() {
                       w-2.5 h-2.5 rounded-full transition-all duration-200
                       ${
                         item.id === activePage
-                          ? 'bg-slate-900 w-6'
+                          ? `${accentDot} w-6`
                           : 'bg-slate-300 hover:bg-slate-400'
                       }
                     `}
@@ -254,7 +316,7 @@ function App() {
           </div>
 
           {/* Page content */}
-          <div key={activePage} className="px-6 lg:px-10 py-8 animate-fade-in">
+          <div key={`${version}-${activePage}`} className="px-6 lg:px-10 py-8 animate-fade-in">
             {renderPage()}
           </div>
         </div>

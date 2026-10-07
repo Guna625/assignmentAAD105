@@ -6,6 +6,8 @@ export type PageId =
   | 'weather'
   | 'interactive';
 
+export type Version = 'mine' | 'friend';
+
 export interface NavItem {
   id: PageId;
   label: string;
